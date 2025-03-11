@@ -1,0 +1,6 @@
+[submodule "gateway"]
+	path = gateway
+	url = git@github.com:bam1to/gateway.git
+[submodule "user"]
+	path = user
+	url = git@github.com:bam1to/user.git
