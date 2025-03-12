@@ -1,0 +1,60 @@
+name: to-do-app
+
+services:
+  api_gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: api_gateway
+    expose:
+      - 9000
+    networks:
+      - to-do-app-backend
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - api_gateway
+    networks:
+      - to-do-app-backend
+
+  user:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+    container_name: user
+    depends_on:
+      - api_gateway
+      - redis
+    networks:
+      - to-do-app-backend
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - to-do-app-backend
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: to_do_app
+    networks:
+      - to-do-app-backend
