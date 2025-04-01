@@ -5,34 +5,43 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
+      args:
+        - APP_ENV=${APP_ENV:-dev}
     container_name: api_gateway
     expose:
       - 9000
     networks:
       - to-do-app-backend
+    volumes:
+      - ./gateway:/app
 
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: nginx
-    ports:
-      - "80:80"
-    depends_on:
-      - api_gateway
-    networks:
-      - to-do-app-backend
+# we need nginx for prod only
+#  nginx:
+#    build:
+#      context: ./nginx
+#      dockerfile: Dockerfile
+#    container_name: nginx
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - api_gateway
+#    networks:
+#      - to-do-app-backend
 
   user:
     build:
       context: ./user
       dockerfile: Dockerfile
+      args:
+        - APP_ENV=${APP_ENV:-dev}
     container_name: user
     depends_on:
       - api_gateway
       - redis
     networks:
       - to-do-app-backend
+    volumes:
+      - ./user:/app
 
   redis:
     image: redis:latest
@@ -58,3 +67,7 @@ services:
       POSTGRES_DB: to_do_app
     networks:
       - to-do-app-backend
+
+networks:
+  to-do-app-backend:
+    driver: bridge
